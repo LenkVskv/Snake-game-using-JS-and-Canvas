@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Snake Game</title>
+    <script src = "app.js"> </script>
+   
+
+<body>
+
+    <canvas id="cnvs" width="400px" height="400px" style="position: relative; border : 3px solid red;  "></canvas>
+    <script>
+        
+           function createBlock(ctx, x, y, w, h){
+                ctx.moveTo(x,y);
+                ctx.lineTo(x+w,y);
+                ctx.lineTo(x+w,y+h);
+                ctx.lineTo(x,y+h);
+                ctx.lineTo(x,y);
+                ctx.stroke();
+           }
+
+           function createTable(prop){
+                for(var i = 0; i < prop.cellCount; i++){
+                    for(var j = 0; j < prop.cellCount; j++){
+                        createBlock(prop.ctx,prop.cellWidth*i, prop.cellHeigth*j,prop.cellWidth,prop.cellHeigth);
+                    }
+                }
+           }
+
+           function fillCell(prop,x,y,collor){
+               prop.ctx.fillStyle = collor;
+               prop.ctx.fillRect(x*prop.cellHeigth,y*prop.cellHeigth,prop.cellWidth,prop.cellHeigth);
+               prop.ctx.stroke();
+           }
+           function createSnake(prop){
+                for(var i = 0; i < prop.snake.length; i++){
+                    fillCell(prop,prop.snake[i].x,prop.snake[i].y,"green");
+                }
+               
+           }
+            function createApple(prop){
+                   while(true){
+                        prop.apple.x = Math.floor(Math.random()*prop.cellCount);
+                        prop.apple.y = Math.floor(Math.random()*prop.cellCount);
+                        if(canAdd(prop,prop.apple)){
+                            fillCell(prop, prop.apple.x,prop.apple.y,"red");
+                            break;
+                        }
+                   }
+            }
+            
+            function canAdd(prop, target){
+                for(let i = 0; i < prop.snake.length; i++){
+                    if(target.x == prop.snake[i].x && target.y == prop.snake[i].y){
+                        return false;
+                    }
+                }
+                return true;
+            }
+        
+           
+           function eatApple(prop){
+                    for(var i = 0; i < prop.snake; i++){
+                        if(prop.tail[i].x == prop.apple.x && prop.tail[i].y == prop.apple.y){
+                           snake.tail = newArray(prop.apple);
+                           snake.length += prop.apple;
+                           fillCell (prop, prop.apple.x, prop.apple.y,"green");
+                        }
+                       
+                   
+               }
+            }
+              
+           
+            
+            function initProperty(){
+                var prop = new Object();
+                prop.canvas = document.getElementById("cnvs");
+                prop.ctx = prop.canvas.getContext("2d");
+                prop.cellCount = 10;
+                prop.cellWidth = prop.canvas.width / prop.cellCount;
+                prop.cellHeigth = prop.canvas.height / prop.cellCount;
+                prop.apple ={"x": 0, "y": 0};
+                prop.snake = [{"x":7,"y":4},{"x":6,"y":4},{"x":5,"y":4},{"x":4,"y":4},{"x":3,"y":4}];
+                prop.tail = prop.snake[prop.snake.length-1];
+                prop.head = prop.snake[0];
+                prop.direction = "right";
+                prop.interval;
+                document.addEventListener("keydown",function() {
+                    console.log(JSON.stringify(prop.snake));
+                    switch(event.keyCode){
+                        case 37:
+                        left(prop);
+                        break;
+                        case 38:
+                        up(prop);
+                        break;
+                        case 39:
+                        right(prop)
+                        break;
+                        case 40:
+                        down(prop);
+                        break;
+                    }
+                });
+                return prop;
+            }
+            function movement(prop){ 
+                let nextCell;
+                switch(prop.direction){
+                    case "left":
+                        nextCell = {
+                            'x': (prop.head.x - 1),
+                            'y': prop.head.y
+                        }
+                    break;
+                    case "right":
+                        nextCell = {
+                            'x': (prop.head.x + 1),
+                            'y': prop.head.y
+                        }
+                    break;
+                    case "up":
+                        nextCell = {
+                            'x': prop.head.x,
+                            'y': (prop.head.y - 1)
+                        }
+                    break;
+                    case "down":
+                        nextCell = {
+                            'x': prop.head.x,
+                            'y': (prop.head.y + 1)
+                        }
+                    break;
+                }
+                checkCollision(prop, nextCell);
+                let tail ={
+                    'x': prop.tail.x,
+                    'y': prop.tail.y
+                }
+                let isApple = isAppleInCell(prop,nextCell);
+                
+                
+                resetSnake(prop);
+                prop.head.x = nextCell.x;
+                prop.head.y = nextCell.y;
+                fillCell(prop,prop.head.x,prop.head.y,"green");
+                
+                if(isApple){
+                    scaleSnake(prop,tail);
+                    prop.tail = prop.snake[prop.snake.length - 1]; 
+                    createApple(prop);
+                }
+            }
+            
+            
+            function isAppleInCell(prop, cell){
+                if(cell.x == prop.apple.x && cell.y == prop.apple.y){
+                    return true;
+                }
+                return false;
+            }
+            
+            
+            function left(prop){
+               if(prop.direction != "right"){
+                   prop.direction = "left";
+               }
+            }
+
+            function right(prop){
+                if(prop.direction != "left"){
+                   prop.direction = "right";
+               }
+            }
+            function up(prop){
+                if(prop.direction != "down"){
+                   prop.direction = "up";
+               }
+            }
+            function down(prop){
+                if(prop.direction != "up"){
+                   prop.direction = "down";
+               }
+          }
+          
+
+          function checkCollision (prop, nextCell){
+                
+                for(let i =0; i< prop.snake.length;i++){
+                    if(nextCell.x == prop.snake[i].x && nextCell.y == prop.snake[i].y){
+                        document.location.reload(true);
+                    }
+                }
+               
+            }
+          
+               
+                
+          
+
+            function scaleSnake(prop,newCell){
+                prop.snake.push(newCell);
+                fillCell(prop,newCell.x,newCell.y,"green");
+            }
+
+            function resetSnake(prop){
+                for(var i = prop.snake.length -1; i > 0 ; i--){
+                        if(i == prop.snake.length -1){
+                            fillCell(prop,prop.snake[i].x,prop.snake[i].y,"white");
+                        }
+                            prop.snake[i].x = prop.snake[i-1].x;
+                            prop.snake[i].y = prop.snake[i-1].y;
+                }
+                prop.head = prop.snake[0];
+                prop.tail = prop.snake[prop.snake.length-1];
+            }
+            function start(){
+                var prop = initProperty();
+                createTable(prop);
+                createSnake(prop);
+                createApple(prop);
+               
+                prop.interval = setInterval(()=>{movement(prop)}, 1000);
+            }
+            start();
+    </script>
+        
+
+    </body>
